@@ -47,9 +47,9 @@ CPM_EnsureRepoIsCurrent(
 
 CPM_ExportAdditionalIncludeDir("${FLATBUFFERS_DIR}/include")
 # Build flatc
-execute_process(COMMAND ${CMAKE_COMMAND} ${FLATBUFFERS_DIR})
+#execute_process(COMMAND ${CMAKE_COMMAND} ${FLATBUFFERS_DIR})
 # Setup CMake support in Flatbuffers
-LIST(APPEND CMAKE_PROGRAM_PATH ${FLATBUFFERS_DIR} ...)
+#LIST(APPEND CMAKE_PROGRAM_PATH ${FLATBUFFERS_DIR} ...)
 # Include support for CMake
-include(${FLATBUFFERS_DIR}/CMake/FindFlatBuffers.cmake
+#include(${FLATBUFFERS_DIR}/CMake/FindFlatBuffers.cmake
 
