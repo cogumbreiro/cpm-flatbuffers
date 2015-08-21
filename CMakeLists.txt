@@ -45,11 +45,15 @@ CPM_EnsureRepoIsCurrent(
   USE_CACHING TRUE
   )
 
+file(GLOB ModuleSources "${FLATBUFFERS_DIR}/src/idl_[a-zA-Z]*.cpp")
+file(GLOB ModuleHeaders "${FLATBUFFERS_DIR}/include/*/*.h")
+
+
+#-----------------------------------------------------------------------
+# Library setup
+#-----------------------------------------------------------------------
+
+# Build the library.
+add_library(${CPM_LIB_TARGET_NAME} ${ModuleSources} ${ModuleHeaders})
 CPM_ExportAdditionalIncludeDir("${FLATBUFFERS_DIR}/include")
-# Build flatc
-#execute_process(COMMAND ${CMAKE_COMMAND} ${FLATBUFFERS_DIR})
-# Setup CMake support in Flatbuffers
-#LIST(APPEND CMAKE_PROGRAM_PATH ${FLATBUFFERS_DIR})
-# Include support for CMake
-#include(${FLATBUFFERS_DIR}/CMake/FindFlatBuffers.cmake
 
