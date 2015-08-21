@@ -54,6 +54,6 @@ file(GLOB ModuleHeaders "${FLATBUFFERS_DIR}/include/*/*.h")
 #-----------------------------------------------------------------------
 
 # Build the library.
-add_library(${CPM_LIB_TARGET_NAME} ${ModuleSources} ${ModuleHeaders})
 CPM_ExportAdditionalIncludeDir("${FLATBUFFERS_DIR}/include")
+add_library(${CPM_LIB_TARGET_NAME} ${ModuleSources} ${ModuleHeaders})
 
