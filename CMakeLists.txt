@@ -45,15 +45,60 @@ CPM_EnsureRepoIsCurrent(
   USE_CACHING TRUE
   )
 
-file(GLOB ModuleSources "${FLATBUFFERS_DIR}/src/idl_[a-zA-Z]*.cpp")
-file(GLOB ModuleHeaders "${FLATBUFFERS_DIR}/include/*/*.h")
+set(FlatBuffers_Library_SRCS
+  ${FLATBUFFERS_DIR}/include/flatbuffers/flatbuffers.h
+  ${FLATBUFFERS_DIR}/include/flatbuffers/hash.h
+  ${FLATBUFFERS_DIR}/include/flatbuffers/idl.h
+  ${FLATBUFFERS_DIR}/include/flatbuffers/util.h
+  ${FLATBUFFERS_DIR}/include/flatbuffers/reflection.h
+  ${FLATBUFFERS_DIR}/include/flatbuffers/reflection_generated.h
+  ${FLATBUFFERS_DIR}/src/idl_parser.cpp
+  ${FLATBUFFERS_DIR}/src/idl_gen_text.cpp
+  ${FLATBUFFERS_DIR}/src/reflection.cpp
+)
 
+set(FlatBuffers_Compiler_SRCS
+  ${FlatBuffers_Library_SRCS}
+  ${FLATBUFFERS_DIR}/src/idl_gen_cpp.cpp
+  ${FLATBUFFERS_DIR}/src/idl_gen_general.cpp
+  ${FLATBUFFERS_DIR}/src/idl_gen_go.cpp
+  ${FLATBUFFERS_DIR}/src/idl_gen_python.cpp
+  ${FLATBUFFERS_DIR}/src/idl_gen_fbs.cpp
+  ${FLATBUFFERS_DIR}/src/flatc.cpp
+)
+
+if(APPLE)
+  set(CMAKE_CXX_FLAGS
+    "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Werror -Wextra")
+elseif(CMAKE_COMPILER_IS_GNUCXX)
+  set(CMAKE_CXX_FLAGS
+    "${CMAKE_CXX_FLAGS} -std=c++0x -Wall -pedantic -Werror -Wextra")
+elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  set(CMAKE_CXX_FLAGS
+    "${CMAKE_CXX_FLAGS} -std=c++0x -stdlib=libc++ -Wall -pedantic -Werror -Wextra")
+endif()
 
 #-----------------------------------------------------------------------
 # Library setup
 #-----------------------------------------------------------------------
 
 # Build the library.
+include_directories("${FLATBUFFERS_DIR}/include")
+add_library(${CPM_MODULE_NAME} STATIC ${FlatBuffers_Library_SRCS})
 CPM_ExportAdditionalIncludeDir("${FLATBUFFERS_DIR}/include")
-add_library(${CPM_LIB_TARGET_NAME} ${ModuleSources} ${ModuleHeaders})
+CPM_ExportAdditionalLibraryTarget(${CPM_MODULE_NAME})
+
+# Compile flatc
+add_executable(flatc ${FlatBuffers_Compiler_SRCS})
+
+function(compile_flatbuffers_schema_to_cpp SRC_FBS TARGET_NAME)
+  get_filename_component(SRC_FBS_DIR ${SRC_FBS} PATH)
+  string(REGEX REPLACE "\\.fbs$" "_generated.h" GEN_HEADER ${SRC_FBS})
+  add_custom_command(
+    OUTPUT ${GEN_HEADER}
+    COMMAND flatc -c --no-includes --gen-mutable -o "${SRC_FBS_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/${SRC_FBS}"
+    DEPENDS flatc)
+  add_custom_target(${TARGET_NAME} DEPENDS ${GEN_HEADER})
+endfunction()
+
 
